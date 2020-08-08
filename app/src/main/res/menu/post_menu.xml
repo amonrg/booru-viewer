@@ -1,0 +1,13 @@
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+    <item
+        android:id="@+id/app_bar_download"
+        android:icon="@drawable/ic_file_download_white_24dp"
+        android:title="Download"
+        app:showAsAction="ifRoom" />
+    <item
+        android:id="@+id/app_bar_tags"
+        android:icon="@drawable/ic_local_offer_white_24dp"
+        android:title="Tags"
+        app:showAsAction="ifRoom" />
+</menu>

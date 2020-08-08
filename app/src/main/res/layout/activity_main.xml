@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/colorPrimaryDark"
+    android:orientation="vertical"
+    tools:context=".ui.activity.MainActivity">
+
+    <androidx.appcompat.widget.Toolbar
+        android:id="@+id/main_toolbar"
+        android:layout_width="match_parent"
+        android:layout_height="?attr/actionBarSize"
+        android:background="@color/colorPrimary"
+        android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"
+        app:popupTheme="@style/ThemeOverlay.AppCompat.Light" />
+
+    <TextView
+        android:id="@+id/txt_error"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textSize="20sp"
+        android:textColor="#FFFFFF"
+        android:gravity="center"
+        android:layout_gravity="center"/>
+
+    <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:id="@+id/posts_refresh">
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/recycler_view_posts"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:scrollbars="vertical" />
+<!--        <GridView-->
+<!--            android:id="@+id/posts_grid"-->
+<!--            android:layout_width="match_parent"-->
+<!--            android:layout_height="match_parent"-->
+<!--            android:gravity="center"-->
+<!--            android:numColumns="auto_fit"-->
+<!--            android:stretchMode="columnWidth"/>-->
+    </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
+</LinearLayout>

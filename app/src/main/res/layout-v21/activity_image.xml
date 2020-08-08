@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:background="@color/gray"
+    android:orientation="vertical"
+    tools:context=".ui.activity.ImageActivity">
+
+    <androidx.appcompat.widget.Toolbar
+        android:id="@+id/image_toolbar"
+        android:layout_width="match_parent"
+        android:layout_height="?attr/actionBarSize"
+        android:background="@null"
+        android:theme="@style/Theme.AppCompat.NoActionBar" />
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
+            <com.github.piasy.biv.view.BigImageView
+                android:id="@+id/mBigImage"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                app:failureImageInitScaleType="center"
+                app:optimizeDisplay="true"
+            />
+
+<!--        <WebView-->
+<!--            android:id="@+id/image_webview"-->
+<!--            android:layout_width="match_parent"-->
+<!--            android:layout_height="wrap_content"-->
+<!--            android:layout_centerHorizontal="true"-->
+<!--            android:layout_centerVertical="true"-->
+<!--            android:layout_gravity="center_vertical" />-->
+
+        </RelativeLayout>
+
+</LinearLayout>
