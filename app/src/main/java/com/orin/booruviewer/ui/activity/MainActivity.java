@@ -1,5 +1,6 @@
 package com.orin.booruviewer.ui.activity;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.recyclerview.widget.GridLayoutManager;
@@ -53,6 +54,7 @@ public class MainActivity extends AppCompatActivity {
 
             txtError.setVisibility(View.VISIBLE);
             txtError.setText(errorMsg);
+            System.out.println(errorMsg);
         }
     };
 
@@ -78,6 +80,7 @@ public class MainActivity extends AppCompatActivity {
 
     private void initRefreshLayout() {
         final SwipeRefreshLayout refreshLayout = findViewById(R.id.posts_refresh);
+
         refreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override
             public void onRefresh() {
@@ -92,21 +95,26 @@ public class MainActivity extends AppCompatActivity {
 
     private void initGridLayout() {
         final RecyclerView recyclerView = findViewById(R.id.recycler_view_posts);
-        GridLayoutManager gridLayoutManager = new GridLayoutManager(MainActivity.this, 2);
+        final GridLayoutManager gridLayoutManager = new GridLayoutManager(MainActivity.this, 2);
 
         recyclerView.setHasFixedSize(true);
         recyclerView.setLayoutManager(gridLayoutManager);
         recyclerView.setAdapter(postAdapter);
 
-        postAdapter.setLoadMoreListener(new PostAdapter.OnLoadMoreListener() {
+        recyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
             @Override
-            public void onLoadMore() {
-                recyclerView.post(new Runnable() {
-                    @Override
-                    public void run() {
+            public void onScrollStateChanged(@NonNull RecyclerView recyclerView, int newState) {
+                super.onScrollStateChanged(recyclerView, newState);
+            }
+
+            @Override
+            public void onScrolled(@NonNull RecyclerView recyclerView, int dx, int dy) {
+                if (dy > 0) {
+                    if (gridLayoutManager.findLastCompletelyVisibleItemPosition() == posts.size() - 1 && gridLayoutManager.findFirstVisibleItemPosition() != 0) {
                         GelbooruApi.getInstance().fetchPostsFromPage(++pid, tags, postsCallback);
+                        System.out.println(pid);
                     }
-                });
+                }
             }
         });
     }
@@ -132,7 +140,6 @@ public class MainActivity extends AppCompatActivity {
 
                 post.setThumburl(thumburl.toString());
                 posts.add(post);
-                //postAdapter.notifyItemInserted(posts.size() - 1);
             }
             postAdapter.notifyDataSetChanged();
         } catch (JSONException e) {

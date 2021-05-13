@@ -1,6 +1,5 @@
 package com.orin.booruviewer.ui.activity;
 
-import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -93,7 +92,9 @@ public class SearchActivity extends AppCompatActivity {
                         for (int i = 0; i < response.length(); i++) {
                             try {
                                 autotagAdapter.clear();
-                                autotag[i] = response.getString(i);
+                                //JSONObject jsonObject = response.getJSONObject(i);
+                                autotag[i] = response.getJSONObject(i).getString("value"); // jsonObject.getString("value");
+                                System.out.println(autotag[i]);
                             } catch (JSONException e) {
                                 e.printStackTrace();
                             }

@@ -153,7 +153,6 @@ public class ImageActivity extends AppCompatActivity {
 
                 if (bigImageView.getCurrentImageFile() != null) {
                     File file = new File(Environment.getExternalStorageDirectory().getPath() + "/Gelbooru/" + post.getFilename());
-
                     saveFile(file);
                     showNotification(file);
                 } else {
