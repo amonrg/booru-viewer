@@ -7,7 +7,7 @@ import java.util.Set;
 
 /**
  * Autocomplete URL
- * https://gelbooru.com/index.php?page=autocomplete&term=
+ * https://gelbooru.com/index.php?page=autocomplete2&term=&type=tag_query
  */
 public class GelUrl {
     private final String apiKey;
@@ -26,6 +26,7 @@ public class GelUrl {
     private final String term;
     private final String order;
     private final String orderby;
+    private final String type;
     private final String SITE;
 
     private GelUrl(Builder builder) {
@@ -46,6 +47,7 @@ public class GelUrl {
         this.order = builder.order;
         this.orderby = builder.orderby;
         this.SITE = "https://gelbooru.com/index.php?";
+        this.type = builder.type;
     }
 
     @Override
@@ -104,6 +106,9 @@ public class GelUrl {
         if (orderby != null)
             sb.append("&orderby=").append(orderby);
 
+        if (type != null)
+            sb.append("&type=").append(type);
+
         return sb.toString();
     }
 
@@ -124,6 +129,7 @@ public class GelUrl {
         private String order;
         private String orderby;
         private String json;
+        private String type;
 
         public Builder(HashMap<String, String> credentials) {
             if (credentials.get("apiKey") == null || credentials.get("userId") == null) {
@@ -200,6 +206,11 @@ public class GelUrl {
 
         public Builder orderby(String orderby) {
             this.orderby = orderby;
+            return this;
+        }
+
+        public Builder type(String type) {
+            this.type = type;
             return this;
         }
 

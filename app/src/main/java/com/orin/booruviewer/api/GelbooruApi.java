@@ -47,6 +47,7 @@ public class GelbooruApi {
                 .build();
 
         sendRequest(url, callback);
+        System.out.println(url.toString());
     }
 
     public void fetchTagType(String name, final ApiCallback callback) {
@@ -60,7 +61,7 @@ public class GelbooruApi {
     }
 
     public void fetchAutocompleteSuggestions(String term, final ApiCallback callback) {
-        GelUrl url = new GelUrl.Builder(this.credentials).page("autocomplete").term(term).build();
+        GelUrl url = new GelUrl.Builder(this.credentials).page("autocomplete2").term(term).type("tag_query").limit("10").build();
         sendRequest(url, callback);
     }
 
@@ -80,7 +81,8 @@ public class GelbooruApi {
                 } else if (error instanceof ServerError) {
                     msg = "The server could not be found.";
                 } else if (error instanceof ParseError) {
-                    msg = "Parsing error.";
+                    //msg = "Parsing error.";
+                    msg = error.getMessage();
                 } else if (error instanceof TimeoutError) {
                     msg = "Connection Timeout.";
                 }
