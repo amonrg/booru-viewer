@@ -92,8 +92,7 @@ public class SearchActivity extends AppCompatActivity {
                         for (int i = 0; i < response.length(); i++) {
                             try {
                                 autotagAdapter.clear();
-                                //JSONObject jsonObject = response.getJSONObject(i);
-                                autotag[i] = response.getJSONObject(i).getString("value"); // jsonObject.getString("value");
+                                autotag[i] = response.getJSONObject(i).getString("value");
                                 System.out.println(autotag[i]);
                             } catch (JSONException e) {
                                 e.printStackTrace();
