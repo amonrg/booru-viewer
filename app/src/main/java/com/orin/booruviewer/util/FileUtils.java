@@ -75,16 +75,17 @@ public class FileUtils {
     }
 
     public void downloadFile(Post post) {
-        File pathFile = new File(Environment.getExternalStorageDirectory().getPath() + "/Gelbooru/");
+        final String SITE_FOLDER = "/Gelbooru/";
+        File pathFile = new File(Environment.getExternalStorageDirectory().getPath() + SITE_FOLDER);
         File file;
 
         if (pathFile.exists()) {
-            System.out.println("Path already exists");
+            System.out.println("Path already exists.");
         } else {
             pathFile.mkdirs();
         }
 
-        file = new File(Environment.getExternalStorageDirectory().getPath() + "/Gelbooru/" + post.getFilename());
+        file = new File(Environment.getExternalStorageDirectory().getPath() + SITE_FOLDER + post.getFilename());
 
         DownloadManager.Request request = new DownloadManager.Request(Uri.parse(post.getFileurl()))
                 .setTitle(post.getFilename())
@@ -104,16 +105,22 @@ public class FileUtils {
     }
 
     public boolean isAnimated(Post post) {
-        String ext = FileUtils.getInstance().getFileExtension(post);
+        String ext = getFileExtension(post);
 
-        return ext.equals("mp4") || ext.equals("webm") || ext.equals("gif");
+        switch (ext) {
+            case "mp4":
+            case "webm":
+            case "gif":
+                return true;
+            default:
+                return false;
+        }
     }
 
     public String getFileType(Post post) {
         if (isAnimated(post))
             return "video/*";
-        else
-            return "image/*";
+        return "image/*";
     }
 
     public void copyToStorage(File src, File dst) throws IOException {
