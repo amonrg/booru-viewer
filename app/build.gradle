@@ -39,4 +39,23 @@ dependencies {
     implementation 'com.github.piasy:BigImageViewer:1.6.5'
     implementation 'com.github.piasy:GlideImageLoader:1.6.5'
     implementation 'com.github.piasy:GlideImageViewFactory:1.6.5'
+    implementation ("com.squareup.okhttp3:okhttp:3.12.6"){
+        force = true //API 19 support
+    }
+    implementation 'com.squareup.okhttp3:logging-interceptor:3.12.6'
+}
+
+configurations {
+    all {
+        resolutionStrategy {
+            eachDependency { DependencyResolveDetails details ->
+                if (details.requested.group == 'com.squareup.okhttp3' &&
+                        details.requested.name ==
+                        'okhttp') {
+                    // OkHttp drops support before 5.0 since 3.13.0
+                    details.useVersion '3.12.6'
+                }
+            }
+        }
+    }
 }

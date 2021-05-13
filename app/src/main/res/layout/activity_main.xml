@@ -35,12 +35,5 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:scrollbars="vertical" />
-<!--        <GridView-->
-<!--            android:id="@+id/posts_grid"-->
-<!--            android:layout_width="match_parent"-->
-<!--            android:layout_height="match_parent"-->
-<!--            android:gravity="center"-->
-<!--            android:numColumns="auto_fit"-->
-<!--            android:stretchMode="columnWidth"/>-->
     </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
 </LinearLayout>

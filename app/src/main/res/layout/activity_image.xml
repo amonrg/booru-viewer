@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/colorPrimaryDark"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:background="@color/gray"
     android:orientation="vertical"
     tools:context=".ui.activity.ImageActivity">
 
@@ -21,10 +21,17 @@
         android:layout_height="match_parent"
         android:gravity="center">
 
-        <WebView
-            android:id="@+id/image_webview"
+        <com.github.piasy.biv.view.BigImageView
+            android:id="@+id/mBigImage"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"/>
+            android:layout_height="match_parent"
+            app:failureImageInitScaleType="center"
+            app:optimizeDisplay="true"
+            />
+<!--        <WebView-->
+<!--            android:id="@+id/image_webview"-->
+<!--            android:layout_width="match_parent"-->
+<!--            android:layout_height="match_parent"/>-->
     </RelativeLayout>
 
 </LinearLayout>
