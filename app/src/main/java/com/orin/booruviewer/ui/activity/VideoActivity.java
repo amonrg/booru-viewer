@@ -31,26 +31,26 @@ public class VideoActivity extends AppCompatActivity {
     private SimpleExoPlayer player;
     private Post post;
     private PlayerView playerView;
-    private PhotoView photoView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_video);
+
         initToolbar();
-
         Intent intent = getIntent();
+        PhotoView photoView;
 
-        this.post = (Post) intent.getSerializableExtra("post");
+        post = (Post) intent.getSerializableExtra("post");
         playerView = findViewById(R.id.player_view);
         photoView = findViewById(R.id.photo_view);
 
         if (FileUtils.getInstance().getFileExtension(post).equals("gif")) {
             playerView.setVisibility(View.GONE);
-            playGif(post.getFileurl());
+            Glide.with(this).asGif().load(post.getFileurl()).into(photoView);
         } else {
             photoView.setVisibility(View.GONE);
-            playVideo(this.post.getFileurl());
+            playVideo(post.getFileurl());
         }
     }
 
@@ -65,11 +65,6 @@ public class VideoActivity extends AppCompatActivity {
         player.setPlayWhenReady(true);
         player.setRepeatMode(Player.REPEAT_MODE_ALL);
 
-    }
-
-    private void playGif(String url)
-    {
-        Glide.with(this).asGif().load(url).into(photoView);
     }
 
     private void initToolbar() {
@@ -90,7 +85,7 @@ public class VideoActivity extends AppCompatActivity {
         switch (item.getItemId()) {
             case R.id.app_bar_download:
                 Toast.makeText(getApplicationContext(), "Downloading video", Toast.LENGTH_SHORT).show();
-                FileUtils.getInstance().downloadFile(this.post);
+                FileUtils.getInstance().downloadFile(post);
                 break;
             case R.id.app_bar_tags:
                 DialogFragment dialogFragment = new TagsDialog(post.getTagsSet());
