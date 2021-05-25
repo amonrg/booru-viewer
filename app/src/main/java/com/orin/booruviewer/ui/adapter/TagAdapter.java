@@ -109,6 +109,7 @@ public class TagAdapter extends RecyclerView.Adapter<TagAdapter.ViewHolder> {
                     tags.clear();
                     tags.add(tag);
                     FileUtils.getInstance().saveTags(tags);
+                    i.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
                     ctx.startActivity(i);
                 }
             });
