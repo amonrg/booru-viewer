@@ -88,7 +88,7 @@ public class VideoActivity extends AppCompatActivity {
                 FileUtils.getInstance().downloadFile(post);
                 break;
             case R.id.app_bar_tags:
-                DialogFragment dialogFragment = new TagsDialog(post.getTagsSet());
+                DialogFragment dialogFragment = new TagsDialog(this, post.getTagsSet());
                 dialogFragment.show(getSupportFragmentManager(), "dialog");
                 break;
         }

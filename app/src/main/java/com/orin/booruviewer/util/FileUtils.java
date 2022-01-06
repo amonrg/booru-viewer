@@ -27,6 +27,12 @@ public class FileUtils {
 
     private FileUtils(Context context) {
         this.context = context.getApplicationContext();
+        File tagsFile = new File(context.getFilesDir() + "/tags.set");
+        try {
+            tagsFile.createNewFile();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     public static synchronized void init(Context context) {

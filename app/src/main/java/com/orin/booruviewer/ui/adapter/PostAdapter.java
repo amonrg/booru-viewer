@@ -108,11 +108,12 @@ public class PostAdapter extends RecyclerView.Adapter<PostAdapter.ViewHolder> {
 
             GelbooruApi.getInstance().fetchTagsType(Html.fromHtml(post.getTags()).toString(), new ApiCallback() {
                 @Override
-                public void onSuccess(JSONArray response) {
+                public void onSuccess(Object response) {
                     try {
-                        int length = response.length();
+                        JSONArray jsonArray = ((JSONArray)response);
+                        int length = jsonArray.length();
                         for (int i = 0; i < length; i++) {
-                            JSONObject jsonObject = response.getJSONObject(i);
+                            JSONObject jsonObject = jsonArray.getJSONObject(i);
                             Tag tag = new Tag(jsonObject.getString("tag"));
 
                             tag.setType(jsonObject.getString("type"));

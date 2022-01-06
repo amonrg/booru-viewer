@@ -15,7 +15,9 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.orin.booruviewer.R;
 import com.orin.booruviewer.entity.Tag;
+import com.orin.booruviewer.ui.activity.ImageActivity;
 import com.orin.booruviewer.ui.activity.MainActivity;
+import com.orin.booruviewer.ui.activity.VideoActivity;
 import com.orin.booruviewer.util.FileUtils;
 
 import java.util.Set;
@@ -109,8 +111,12 @@ public class TagAdapter extends RecyclerView.Adapter<TagAdapter.ViewHolder> {
                     tags.clear();
                     tags.add(tag);
                     FileUtils.getInstance().saveTags(tags);
-                    i.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
                     ctx.startActivity(i);
+
+                    if (ctx.getClass().getName().equals("ImageActivity"))
+                        ((ImageActivity)ctx).finish();
+                    else
+                        ((VideoActivity)ctx).finish();
                 }
             });
         }

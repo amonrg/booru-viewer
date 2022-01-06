@@ -88,12 +88,13 @@ public class SearchActivity extends AppCompatActivity {
             public void onTextChanged(CharSequence s, int start, int before, int count) {
                 GelbooruApi.getInstance().fetchAutocompleteSuggestions(s.toString(), new ApiCallback() {
                     @Override
-                    public void onSuccess(JSONArray response) {
-                        for (int i = 0; i < response.length(); i++) {
+                    public void onSuccess(Object response) {
+                        int length = ((JSONArray) response).length();
+                        for (int i = 0; i < length; i++) {
                             try {
+                                JSONObject jsonObject = ((JSONArray) response).getJSONObject(i);
                                 autotagAdapter.clear();
-                                autotag[i] = response.getJSONObject(i).getString("value");
-                                System.out.println(autotag[i]);
+                                autotag[i] = jsonObject.getString("value");
                             } catch (JSONException e) {
                                 e.printStackTrace();
                             }
@@ -121,10 +122,10 @@ public class SearchActivity extends AppCompatActivity {
 
         GelbooruApi.getInstance().fetchTagType(name, new ApiCallback() {
             @Override
-            public void onSuccess(JSONArray response) {
+            public void onSuccess(Object response) {
                 try {
-                    if (response.length() > 0) {
-                        JSONObject jsonObject = response.getJSONObject(0);
+                    if (((JSONArray)response).length() > 0) {
+                        JSONObject jsonObject = ((JSONArray)response).getJSONObject(0);
                         tag.setType(jsonObject.getString("type"));
                     } else {
                         tag.setType(Tag.Type.INVALID.toString());
@@ -132,7 +133,7 @@ public class SearchActivity extends AppCompatActivity {
 
                     tags.add(tag);
                     tagAdapter.notifyDataSetChanged();
-                } catch (JSONException e) {
+                } catch (JSONException | ClassCastException e) {
                     e.printStackTrace();
                 }
             }

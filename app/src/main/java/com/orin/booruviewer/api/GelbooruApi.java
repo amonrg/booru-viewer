@@ -8,9 +8,12 @@ import com.android.volley.ServerError;
 import com.android.volley.TimeoutError;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonArrayRequest;
+import com.android.volley.toolbox.JsonObjectRequest;
 import com.orin.booruviewer.entity.Tag;
 
 import org.json.JSONArray;
+import org.json.JSONObject;
+
 import java.util.HashMap;
 import java.util.Set;
 
@@ -45,27 +48,22 @@ public class GelbooruApi {
                 .pid(String.valueOf(pid))
                 .tags(tags)
                 .build();
-
-        sendRequest(url, callback);
-        System.out.println(url.toString());
+        JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(Request.Method.GET, url.toString(), null, new Response.Listener<JSONObject>() {
+            @Override
+            public void onResponse(JSONObject response) {
+                callback.onSuccess(response);
+            }
+        }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                callback.onError(error_msg(error));
+            }
+        });
+        ApiRequest.getInstance().addToRequestQueue(jsonObjectRequest);
     }
 
     public void fetchTagType(String name, final ApiCallback callback) {
         GelUrl url = new GelUrl.Builder(this.credentials).page("dapi").s("tag").q("index").name(name).json(true).build();
-        sendRequest(url, callback);
-    }
-
-    public void fetchTagsType(String names, final ApiCallback callback) {
-        GelUrl url = new GelUrl.Builder(this.credentials).page("dapi").s("tag").q("index").names(names).order("asc").orderby("name").json(true).build();
-        sendRequest(url, callback);
-    }
-
-    public void fetchAutocompleteSuggestions(String term, final ApiCallback callback) {
-        GelUrl url = new GelUrl.Builder(this.credentials).page("autocomplete2").term(term).type("tag_query").limit("10").build();
-        sendRequest(url, callback);
-    }
-
-    private static void sendRequest(final GelUrl url, final ApiCallback callback) {
         JsonArrayRequest jsonArrayRequest = new JsonArrayRequest(Request.Method.GET, url.toString(), null, new Response.Listener<JSONArray>() {
             @Override
             public void onResponse(JSONArray response) {
@@ -74,23 +72,55 @@ public class GelbooruApi {
         }, new Response.ErrorListener() {
             @Override
             public void onErrorResponse(VolleyError error) {
-                String msg = "";
-
-                if (error instanceof NoConnectionError) {
-                    msg = "No Internet connection.";
-                } else if (error instanceof ServerError) {
-                    msg = "The server could not be found.";
-                } else if (error instanceof ParseError) {
-                    //msg = "Parsing error.";
-                    msg = error.getMessage();
-                } else if (error instanceof TimeoutError) {
-                    msg = "Connection Timeout.";
-                }
-
-                callback.onError(msg);
+                callback.onError(error_msg(error));
             }
         });
-
         ApiRequest.getInstance().addToRequestQueue(jsonArrayRequest);
+    }
+
+    public void fetchTagsType(String names, final ApiCallback callback) {
+        GelUrl url = new GelUrl.Builder(this.credentials).page("dapi").s("tag").q("index").names(names).order("asc").orderby("name").json(true).build();
+        JsonArrayRequest jsonArrayRequest = new JsonArrayRequest(Request.Method.GET, url.toString(), null, new Response.Listener<JSONArray>() {
+            @Override
+            public void onResponse(JSONArray response) {
+                callback.onSuccess(response);
+            }
+        }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                callback.onError(error_msg(error));
+            }
+        });
+        ApiRequest.getInstance().addToRequestQueue(jsonArrayRequest);
+    }
+
+    public void fetchAutocompleteSuggestions(String term, final ApiCallback callback) {
+        GelUrl url = new GelUrl.Builder(this.credentials).page("autocomplete2").term(term).type("tag_query").limit("10").build();
+        JsonArrayRequest jsonArrayRequest = new JsonArrayRequest(Request.Method.GET, url.toString(), null, new Response.Listener<JSONArray>() {
+            @Override
+            public void onResponse(JSONArray response) {
+                callback.onSuccess(response);
+            }
+        }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                callback.onError(error_msg(error));
+            }
+        });
+        ApiRequest.getInstance().addToRequestQueue(jsonArrayRequest);
+    }
+
+    private String error_msg(VolleyError error)
+    {
+        if (error instanceof NoConnectionError) {
+            return "No Internet connection.";
+        } else if (error instanceof ServerError) {
+            return "The server could not be found.";
+        } else if (error instanceof ParseError) {
+            return error.getMessage();
+        } else if (error instanceof TimeoutError) {
+            return "Connection Timeout.";
+        }
+        return "";
     }
 }

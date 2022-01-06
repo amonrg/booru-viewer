@@ -41,7 +41,7 @@ public class MainActivity extends AppCompatActivity {
 
     private ApiCallback postsCallback = new ApiCallback() {
         @Override
-        public void onSuccess(JSONArray response) {
+        public void onSuccess(Object response) {
             TextView txtError = findViewById(R.id.txt_error);
 
             txtError.setVisibility(View.GONE);
@@ -119,11 +119,12 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
-    private void loadPosts(JSONArray response, List<Post> posts) {
+    private void loadPosts(Object response, List<Post> posts) {
         try {
-            int length = response.length();
+            JSONArray jsonArray = ((JSONObject) response).getJSONArray("post");
+            int length = jsonArray.length();
             for (int i = 0; i < length; i++) {
-                JSONObject jsonObject = response.getJSONObject(i);
+                JSONObject jsonObject = jsonArray.getJSONObject(i);
                 StringBuilder thumburl = new StringBuilder();
                 Post post = new Post();
 
@@ -135,7 +136,7 @@ public class MainActivity extends AppCompatActivity {
                 thumburl.append("https://gelbooru.com/thumbnails/").
                         append(jsonObject.getString("directory")).
                         append("/thumbnail_").
-                        append(jsonObject.getString("hash")).
+                        append(jsonObject.getString("md5")).
                         append(".jpg");
 
                 post.setThumburl(thumburl.toString());
@@ -178,5 +179,10 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     public void onBackPressed() {
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
     }
 }

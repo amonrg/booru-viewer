@@ -1,6 +1,7 @@
 package com.orin.booruviewer.ui.dialog;
 
 import android.app.Dialog;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -18,17 +19,19 @@ import java.util.Set;
 
 public class TagsDialog extends DialogFragment {
     private Set<Tag> tags;
+    private Context context;
 
-    public TagsDialog(Set<Tag> tags) {
+    public TagsDialog(Context ctx, Set<Tag> tags) {
         this.tags = tags;
+        this.context = ctx;
     }
 
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
-        AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
-        RecyclerView recyclerView = (RecyclerView) LayoutInflater.from(getContext()).inflate(R.layout.tags_recycler_dialog, null);
-        recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
-        TagAdapter adapter = new TagAdapter(getContext(), tags, TagAdapter.ViewType.DIALOG);
+        AlertDialog.Builder builder = new AlertDialog.Builder(context);
+        RecyclerView recyclerView = (RecyclerView) LayoutInflater.from(context).inflate(R.layout.tags_recycler_dialog, null);
+        recyclerView.setLayoutManager(new LinearLayoutManager(context));
+        TagAdapter adapter = new TagAdapter(context, tags, TagAdapter.ViewType.DIALOG);
         recyclerView.setAdapter(adapter);
 
         builder.setTitle("Tags")

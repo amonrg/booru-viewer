@@ -13,7 +13,6 @@ import android.media.MediaScannerConnection;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.WindowManager;
@@ -160,7 +159,7 @@ public class ImageActivity extends AppCompatActivity {
                 }
                 break;
             case R.id.app_bar_tags:
-                DialogFragment dialogFragment = new TagsDialog(post.getTagsSet());
+                DialogFragment dialogFragment = new TagsDialog(this, post.getTagsSet());
                 dialogFragment.show(getSupportFragmentManager(), "dialog");
                 break;
         }
@@ -201,8 +200,6 @@ public class ImageActivity extends AppCompatActivity {
                     new String[] { file.toString() }, null,
                     new MediaScannerConnection.OnScanCompletedListener() {
                         public void onScanCompleted(String path, Uri uri) {
-                            Log.i("ExternalStorage", "Scanned " + path + ":");
-                            Log.i("ExternalStorage", "-> uri=" + uri);
                         }
                     });
         } catch (IOException e) {
