@@ -110,11 +110,10 @@ public class PostAdapter extends RecyclerView.Adapter<PostAdapter.ViewHolder> {
                 @Override
                 public void onSuccess(Object response) {
                     try {
-                        JSONArray jsonArray = ((JSONArray)response);
-                        int length = jsonArray.length();
+                        int length = ((JSONObject)response).getJSONArray("tag").length();
                         for (int i = 0; i < length; i++) {
-                            JSONObject jsonObject = jsonArray.getJSONObject(i);
-                            Tag tag = new Tag(jsonObject.getString("tag"));
+                            JSONObject jsonObject = ((JSONObject)response).getJSONArray("tag").getJSONObject(i);
+                            Tag tag = new Tag(jsonObject.getString("name"));
 
                             tag.setType(jsonObject.getString("type"));
                             post.addTag(tag);

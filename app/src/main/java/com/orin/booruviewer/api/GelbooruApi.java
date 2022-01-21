@@ -64,9 +64,9 @@ public class GelbooruApi {
 
     public void fetchTagType(String name, final ApiCallback callback) {
         GelUrl url = new GelUrl.Builder(this.credentials).page("dapi").s("tag").q("index").name(name).json(true).build();
-        JsonArrayRequest jsonArrayRequest = new JsonArrayRequest(Request.Method.GET, url.toString(), null, new Response.Listener<JSONArray>() {
+        JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(Request.Method.GET, url.toString(), null, new Response.Listener<JSONObject>() {
             @Override
-            public void onResponse(JSONArray response) {
+            public void onResponse(JSONObject response) {
                 callback.onSuccess(response);
             }
         }, new Response.ErrorListener() {
@@ -75,14 +75,15 @@ public class GelbooruApi {
                 callback.onError(error_msg(error));
             }
         });
-        ApiRequest.getInstance().addToRequestQueue(jsonArrayRequest);
+        System.out.println(url.toString());
+        ApiRequest.getInstance().addToRequestQueue(jsonObjectRequest);
     }
 
     public void fetchTagsType(String names, final ApiCallback callback) {
         GelUrl url = new GelUrl.Builder(this.credentials).page("dapi").s("tag").q("index").names(names).order("asc").orderby("name").json(true).build();
-        JsonArrayRequest jsonArrayRequest = new JsonArrayRequest(Request.Method.GET, url.toString(), null, new Response.Listener<JSONArray>() {
+        JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(Request.Method.GET, url.toString(), null, new Response.Listener<JSONObject>() {
             @Override
-            public void onResponse(JSONArray response) {
+            public void onResponse(JSONObject response) {
                 callback.onSuccess(response);
             }
         }, new Response.ErrorListener() {
@@ -91,7 +92,7 @@ public class GelbooruApi {
                 callback.onError(error_msg(error));
             }
         });
-        ApiRequest.getInstance().addToRequestQueue(jsonArrayRequest);
+        ApiRequest.getInstance().addToRequestQueue(jsonObjectRequest);
     }
 
     public void fetchAutocompleteSuggestions(String term, final ApiCallback callback) {
