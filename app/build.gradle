@@ -46,8 +46,8 @@ dependencies {
     implementation "androidx.swiperefreshlayout:swiperefreshlayout:1.1.0"
     implementation 'com.github.chrisbanes:PhotoView:2.0.0'
     implementation 'com.github.piasy:BigImageViewer:1.6.5'
-    implementation 'com.github.piasy:GlideImageLoader:1.6.5'
-    implementation 'com.github.piasy:GlideImageViewFactory:1.6.5'
+    implementation 'com.github.piasy:GlideImageLoader:1.8.1'
+    implementation 'com.github.piasy:GlideImageViewFactory:1.8.1'
     implementation ("com.squareup.okhttp3:okhttp:3.12.6"){
         force = true //API 19 support
     }
