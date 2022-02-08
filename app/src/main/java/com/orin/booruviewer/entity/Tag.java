@@ -7,13 +7,13 @@ import java.util.Objects;
 
 public class Tag implements Serializable {
     public enum Type {
-        COPYRIGHT("copyright"),
-        CHARACTER("character"),
-        ARTIST("artist"),
-        GENERAL("tag"),
-        METADATA("metadata"),
-        DEPRECATED("deprecated"),
-        INVALID("invalid");
+        GENERAL("0"),
+        ARTIST("1"),
+        COPYRIGHT("3"),
+        CHARACTER("4"),
+        METADATA("5"),
+        DEPRECATED("6"),
+        INVALID("7");
 
         private final String name;
 
