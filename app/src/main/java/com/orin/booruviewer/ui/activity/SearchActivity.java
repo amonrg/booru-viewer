@@ -124,9 +124,10 @@ public class SearchActivity extends AppCompatActivity {
             @Override
             public void onSuccess(Object response) {
                 try {
-                    if (((JSONArray)response).length() > 0) {
-                        JSONObject jsonObject = ((JSONArray)response).getJSONObject(0);
-                        tag.setType(jsonObject.getString("type"));
+                    JSONObject objectResponse = (JSONObject) response;
+                    if (objectResponse.getJSONObject("@attributes").getInt("count") > 0) {
+                        JSONArray jsonArray = objectResponse.getJSONArray("tag");
+                        tag.setType(jsonArray.getJSONObject(0).getString("type"));
                     } else {
                         tag.setType(Tag.Type.INVALID.toString());
                     }
