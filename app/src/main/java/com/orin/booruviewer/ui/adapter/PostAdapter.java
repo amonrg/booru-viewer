@@ -2,7 +2,7 @@ package com.orin.booruviewer.ui.adapter;
 
 import android.content.Intent;
 import android.graphics.Bitmap;
-import android.text.Html;
+import android.os.AsyncTask;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -15,17 +15,11 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.nostra13.universalimageloader.core.ImageLoader;
 import com.nostra13.universalimageloader.core.listener.SimpleImageLoadingListener;
 import com.orin.booruviewer.R;
-import com.orin.booruviewer.api.ApiCallback;
 import com.orin.booruviewer.api.GelbooruApi;
 import com.orin.booruviewer.entity.Post;
-import com.orin.booruviewer.entity.Tag;
 import com.orin.booruviewer.ui.activity.ImageActivity;
 import com.orin.booruviewer.ui.activity.VideoActivity;
 import com.orin.booruviewer.util.FileUtils;
-
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
 
 import java.util.List;
 
@@ -40,7 +34,7 @@ public class PostAdapter extends RecyclerView.Adapter<PostAdapter.ViewHolder> {
     @NonNull
     @Override
     public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        View layoutView = LayoutInflater.from(parent.getContext()).inflate(R.layout.reciclerview_post, null);
+        View layoutView = LayoutInflater.from(parent.getContext()).inflate(R.layout.recyclerview_post, null);
 
         return new ViewHolder(layoutView);
     }
@@ -85,9 +79,33 @@ public class PostAdapter extends RecyclerView.Adapter<PostAdapter.ViewHolder> {
     }
 
     static class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
-        ImageView imageView;
-        ProgressBar progressBar;
-        Post post;
+        private ImageView imageView;
+        private ProgressBar progressBar;
+        private Post post;
+
+        private static class InsertTagsTypeTask extends AsyncTask<Object, Void, View> {
+            private Post p;
+            @Override
+            protected View doInBackground(Object... params) {
+                View view = (View)params[0];
+                p = (Post)params[1];
+                GelbooruApi.getInstance().insertTagsType(p);
+                return view;
+            }
+
+            @Override
+            protected void onPostExecute(View v) {
+                final Intent intent;
+
+                if (FileUtils.getInstance().isAnimated(p)) {
+                    intent = new Intent(v.getContext(), VideoActivity.class);
+                } else {
+                    intent = new Intent(v.getContext(), ImageActivity.class);
+                }
+                intent.putExtra("post", p);
+                v.getContext().startActivity(intent);
+            }
+        };
 
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
@@ -98,39 +116,7 @@ public class PostAdapter extends RecyclerView.Adapter<PostAdapter.ViewHolder> {
 
         @Override
         public void onClick(final View v) {
-            final Intent intent;
-
-            if (FileUtils.getInstance().isAnimated(post)) {
-                intent = new Intent(v.getContext(), VideoActivity.class);
-            } else {
-                intent = new Intent(v.getContext(), ImageActivity.class);
-            }
-
-            GelbooruApi.getInstance().fetchTagsType(Html.fromHtml(post.getTags()).toString(), new ApiCallback() {
-                @Override
-                public void onSuccess(Object response) {
-                    try {
-                        int length = ((JSONObject)response).getJSONArray("tag").length();
-                        for (int i = 0; i < length; i++) {
-                            JSONObject jsonObject = ((JSONObject)response).getJSONArray("tag").getJSONObject(i);
-                            Tag tag = new Tag(jsonObject.getString("name"));
-
-                            tag.setType(jsonObject.getString("type"));
-                            post.addTag(tag);
-                        }
-
-                        intent.putExtra("post", post);
-                        v.getContext().startActivity(intent);
-                    } catch (JSONException e) {
-                        e.printStackTrace();
-                    }
-                }
-
-                @Override
-                public void onError(String errorMsg) {
-                    System.out.println(errorMsg);
-                }
-            });
+            new InsertTagsTypeTask().execute(v, post);
         }
     }
 }

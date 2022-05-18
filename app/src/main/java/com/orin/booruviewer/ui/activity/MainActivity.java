@@ -8,25 +8,19 @@ import androidx.recyclerview.widget.RecyclerView;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 import android.content.Intent;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.View;
-import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
 import com.nostra13.universalimageloader.core.ImageLoader;
 import com.orin.booruviewer.R;
-import com.orin.booruviewer.api.ApiCallback;
 import com.orin.booruviewer.api.GelbooruApi;
 import com.orin.booruviewer.entity.Post;
 import com.orin.booruviewer.entity.Tag;
 import com.orin.booruviewer.ui.adapter.PostAdapter;
 import com.orin.booruviewer.util.FileUtils;
-
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.LinkedHashSet;
@@ -34,27 +28,30 @@ import java.util.List;
 import java.util.Set;
 
 public class MainActivity extends AppCompatActivity {
-    private Set<Tag> tags = new LinkedHashSet<>();
-    private int pid = 0;
-    private List<Post> posts = new ArrayList<>();
-    private PostAdapter postAdapter;
+    private static Set<Tag> tags = new LinkedHashSet<>();
+    private static Integer pid = 0;
+    private static List<Post> posts = new ArrayList<>();
+    private static RecyclerView recyclerView;
+    private static boolean isAdapterAdded = false;
+    private static PostAdapter postAdapter;
+    private GridLayoutManager gridLayoutManager;
 
-    private ApiCallback postsCallback = new ApiCallback() {
+    private static class FetchPostsTask extends AsyncTask<Integer, Void, List<Post>> {
         @Override
-        public void onSuccess(Object response) {
-            TextView txtError = findViewById(R.id.txt_error);
-
-            txtError.setVisibility(View.GONE);
-            loadPosts(response, posts);
+        protected List<Post> doInBackground(Integer... params) {
+            return GelbooruApi.getInstance().fetchPostsFromPage(params[0], tags);
         }
 
         @Override
-        public void onError(String errorMsg) {
-            TextView txtError = findViewById(R.id.txt_error);
-
-            txtError.setVisibility(View.VISIBLE);
-            txtError.setText(errorMsg);
-            System.out.println(errorMsg);
+        protected void onPostExecute(List<Post> fetchedPosts) {
+            posts.addAll(fetchedPosts);
+            if (isAdapterAdded) {
+                postAdapter.notifyDataSetChanged();
+            } else {
+                postAdapter = new PostAdapter(posts);
+                recyclerView.setAdapter(postAdapter);
+                isAdapterAdded = true;
+            }
         }
     };
 
@@ -64,13 +61,32 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
         FileUtils.getInstance().readTags(tags);
-        GelbooruApi.getInstance().fetchPostsFromPage(pid, tags, postsCallback);
+        gridLayoutManager = new GridLayoutManager(MainActivity.this, 2);
 
-        postAdapter = new PostAdapter(posts);
+        new FetchPostsTask().execute(pid);
+        recyclerView = findViewById(R.id.recycler_view_posts);
+        recyclerView.setHasFixedSize(true);
+        recyclerView.setLayoutManager(gridLayoutManager);
+
+        recyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
+            @Override
+            public void onScrollStateChanged(@NonNull RecyclerView recyclerView, int newState) {
+                super.onScrollStateChanged(recyclerView, newState);
+            }
+
+            @Override
+            public void onScrolled(@NonNull RecyclerView recyclerView, int dx, int dy) {
+                if (dy > 0) {
+                    if (gridLayoutManager.findLastCompletelyVisibleItemPosition() == posts.size() - 1 && gridLayoutManager.findFirstVisibleItemPosition() != 0) {
+                        pid++;
+                        new FetchPostsTask().execute(pid);
+                    }
+                }
+            }
+        });
 
         initToolbar();
         initRefreshLayout();
-        initGridLayout();
     }
 
     private void initToolbar() {
@@ -86,66 +102,11 @@ public class MainActivity extends AppCompatActivity {
             public void onRefresh() {
                 pid = 0;
                 posts.clear();
-                GelbooruApi.getInstance().fetchPostsFromPage(pid, tags, postsCallback);
+                new FetchPostsTask().execute(pid);
 
                 refreshLayout.setRefreshing(false);
             }
         });
-    }
-
-    private void initGridLayout() {
-        final RecyclerView recyclerView = findViewById(R.id.recycler_view_posts);
-        final GridLayoutManager gridLayoutManager = new GridLayoutManager(MainActivity.this, 2);
-
-        recyclerView.setHasFixedSize(true);
-        recyclerView.setLayoutManager(gridLayoutManager);
-        recyclerView.setAdapter(postAdapter);
-
-        recyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
-            @Override
-            public void onScrollStateChanged(@NonNull RecyclerView recyclerView, int newState) {
-                super.onScrollStateChanged(recyclerView, newState);
-            }
-
-            @Override
-            public void onScrolled(@NonNull RecyclerView recyclerView, int dx, int dy) {
-                if (dy > 0) {
-                    if (gridLayoutManager.findLastCompletelyVisibleItemPosition() == posts.size() - 1 && gridLayoutManager.findFirstVisibleItemPosition() != 0) {
-                        GelbooruApi.getInstance().fetchPostsFromPage(++pid, tags, postsCallback);
-                        System.out.println(pid);
-                    }
-                }
-            }
-        });
-    }
-
-    private void loadPosts(Object response, List<Post> posts) {
-        try {
-            JSONArray jsonArray = ((JSONObject) response).getJSONArray("post");
-            int length = jsonArray.length();
-            for (int i = 0; i < length; i++) {
-                JSONObject jsonObject = jsonArray.getJSONObject(i);
-                StringBuilder thumburl = new StringBuilder();
-                Post post = new Post();
-
-                post.setFilename(jsonObject.getString("image"));
-                post.setFileurl(jsonObject.getString("file_url"));
-                post.setId(jsonObject.getInt("id"));
-                post.setTags(jsonObject.getString("tags"));
-
-                thumburl.append("https://gelbooru.com/thumbnails/").
-                        append(jsonObject.getString("directory")).
-                        append("/thumbnail_").
-                        append(jsonObject.getString("md5")).
-                        append(".jpg");
-
-                post.setThumburl(thumburl.toString());
-                posts.add(post);
-            }
-            postAdapter.notifyDataSetChanged();
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }
     }
 
     @Override
