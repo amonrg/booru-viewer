@@ -28,45 +28,40 @@ import java.util.List;
 import java.util.Set;
 
 public class MainActivity extends AppCompatActivity {
-    private static Set<Tag> tags = new LinkedHashSet<>();
-    private static Integer pid = 0;
-    private static List<Post> posts = new ArrayList<>();
-    private static RecyclerView recyclerView;
-    private static boolean isAdapterAdded = false;
+    private static List<Post> posts;
     private static PostAdapter postAdapter;
-    private GridLayoutManager gridLayoutManager;
+    private Integer pid = 0;
 
     private static class FetchPostsTask extends AsyncTask<Integer, Void, List<Post>> {
         @Override
         protected List<Post> doInBackground(Integer... params) {
+            Set<Tag> tags = new LinkedHashSet<>();
+            FileUtils.getInstance().readTags(tags);
             return GelbooruApi.getInstance().fetchPostsFromPage(params[0], tags);
         }
 
         @Override
         protected void onPostExecute(List<Post> fetchedPosts) {
             posts.addAll(fetchedPosts);
-            if (isAdapterAdded) {
-                postAdapter.notifyDataSetChanged();
-            } else {
-                postAdapter = new PostAdapter(posts);
-                recyclerView.setAdapter(postAdapter);
-                isAdapterAdded = true;
-            }
+            postAdapter.notifyDataSetChanged();
         }
-    };
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        FileUtils.getInstance().readTags(tags);
-        gridLayoutManager = new GridLayoutManager(MainActivity.this, 2);
+        final GridLayoutManager gridLayoutManager = new GridLayoutManager(MainActivity.this, 2);
+        RecyclerView recyclerView = findViewById(R.id.recycler_view_posts);
 
-        new FetchPostsTask().execute(pid);
-        recyclerView = findViewById(R.id.recycler_view_posts);
+        posts = new ArrayList<>();
+        postAdapter = new PostAdapter(posts);
+        pid = 0;
+
         recyclerView.setHasFixedSize(true);
         recyclerView.setLayoutManager(gridLayoutManager);
+        recyclerView.setAdapter(postAdapter);
 
         recyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
             @Override
@@ -87,6 +82,8 @@ public class MainActivity extends AppCompatActivity {
 
         initToolbar();
         initRefreshLayout();
+
+        new FetchPostsTask().execute(pid);
     }
 
     private void initToolbar() {
