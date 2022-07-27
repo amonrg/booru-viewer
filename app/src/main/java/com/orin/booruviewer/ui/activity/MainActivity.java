@@ -8,10 +8,13 @@ import androidx.recyclerview.widget.RecyclerView;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 import android.content.Intent;
-import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
 import com.nostra13.universalimageloader.core.ImageLoader;
@@ -26,26 +29,14 @@ import java.util.ArrayList;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.Executor;
+import java.util.concurrent.Executors;
 
 public class MainActivity extends AppCompatActivity {
-    private static List<Post> posts;
-    private static PostAdapter postAdapter;
-    private Integer pid = 0;
-
-    private static class FetchPostsTask extends AsyncTask<Integer, Void, List<Post>> {
-        @Override
-        protected List<Post> doInBackground(Integer... params) {
-            Set<Tag> tags = new LinkedHashSet<>();
-            FileUtils.getInstance().readTags(tags);
-            return GelbooruApi.getInstance().fetchPostsFromPage(params[0], tags);
-        }
-
-        @Override
-        protected void onPostExecute(List<Post> fetchedPosts) {
-            posts.addAll(fetchedPosts);
-            postAdapter.notifyDataSetChanged();
-        }
-    }
+    private List<Post> posts;
+    private PostAdapter postAdapter;
+    private Integer pageId = 0;
+    private TextView txtError;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -54,14 +45,16 @@ public class MainActivity extends AppCompatActivity {
 
         final GridLayoutManager gridLayoutManager = new GridLayoutManager(MainActivity.this, 2);
         RecyclerView recyclerView = findViewById(R.id.recycler_view_posts);
+        txtError = findViewById(R.id.txt_error);
 
         posts = new ArrayList<>();
         postAdapter = new PostAdapter(posts);
-        pid = 0;
+        pageId = 0;
 
         recyclerView.setHasFixedSize(true);
         recyclerView.setLayoutManager(gridLayoutManager);
         recyclerView.setAdapter(postAdapter);
+        txtError.setVisibility(View.GONE);
 
         recyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
             @Override
@@ -73,8 +66,8 @@ public class MainActivity extends AppCompatActivity {
             public void onScrolled(@NonNull RecyclerView recyclerView, int dx, int dy) {
                 if (dy > 0) {
                     if (gridLayoutManager.findLastCompletelyVisibleItemPosition() == posts.size() - 1 && gridLayoutManager.findFirstVisibleItemPosition() != 0) {
-                        pid++;
-                        new FetchPostsTask().execute(pid);
+                        pageId++;
+                        showPosts(pageId);
                     }
                 }
             }
@@ -83,7 +76,7 @@ public class MainActivity extends AppCompatActivity {
         initToolbar();
         initRefreshLayout();
 
-        new FetchPostsTask().execute(pid);
+        showPosts(pageId);
     }
 
     private void initToolbar() {
@@ -97,10 +90,9 @@ public class MainActivity extends AppCompatActivity {
         refreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override
             public void onRefresh() {
-                pid = 0;
+                pageId = 0;
                 posts.clear();
-                new FetchPostsTask().execute(pid);
-
+                showPosts(pageId);
                 refreshLayout.setRefreshing(false);
             }
         });
@@ -142,5 +134,38 @@ public class MainActivity extends AppCompatActivity {
     @Override
     public void onResume() {
         super.onResume();
+    }
+
+    private void showPosts(final Integer pid) {
+        final Executor executor = Executors.newSingleThreadExecutor();
+        final Handler handler = new Handler(Looper.getMainLooper());
+
+        executor.execute(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    Set<Tag> tags = new LinkedHashSet<>();
+                    FileUtils.getInstance().readTags(tags);
+                    posts.addAll(GelbooruApi.getInstance().fetchPostsFromPage(pid, tags));
+
+                    handler.post(new Runnable() {
+                        @Override
+                        public void run() {
+                            postAdapter.notifyDataSetChanged();
+                        }
+                    });
+                } catch (Exception e) {
+                    handler.post(new Runnable() {
+                        @Override
+                        public void run() {
+                            if (posts.isEmpty()) {
+                                txtError.setVisibility(View.VISIBLE);
+                                txtError.setText(R.string.no_images);
+                            }
+                        }
+                    });
+                }
+            }
+        });
     }
 }
