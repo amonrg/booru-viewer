@@ -52,6 +52,7 @@ dependencies {
         force = true //API 19 support
     }
     implementation 'com.squareup.okhttp3:logging-interceptor:3.12.6'
+    implementation 'com.google.android.gms:play-services-auth:17.0.0'
 }
 
 configurations {
