@@ -1,8 +1,10 @@
 package com.orin.booruviewer.ui.adapter;
 
+import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
-import android.os.AsyncTask;
+import android.os.Handler;
+import android.os.Looper;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -22,10 +24,11 @@ import com.orin.booruviewer.ui.activity.VideoActivity;
 import com.orin.booruviewer.util.FileUtils;
 
 import java.util.List;
+import java.util.concurrent.Executor;
+import java.util.concurrent.Executors;
 
 public class PostAdapter extends RecyclerView.Adapter<PostAdapter.ViewHolder> {
     private List<Post> posts;
-    private OnLoadMoreListener loadMoreListener;
 
     public PostAdapter(List<Post> posts) {
         this.posts = posts;
@@ -41,10 +44,6 @@ public class PostAdapter extends RecyclerView.Adapter<PostAdapter.ViewHolder> {
 
     @Override
     public void onBindViewHolder(@NonNull final ViewHolder holder, int position) {
-        if (position >= getItemCount() - 1 && loadMoreListener != null) {
-            loadMoreListener.onLoadMore();
-        }
-
         ImageLoader.getInstance().displayImage(posts.get(position).getThumburl(), holder.imageView, new SimpleImageLoadingListener() {
             @Override
             public void onLoadingStarted(String imageUri, View view) {
@@ -70,42 +69,10 @@ public class PostAdapter extends RecyclerView.Adapter<PostAdapter.ViewHolder> {
         return this.posts.size();
     }
 
-    public interface OnLoadMoreListener {
-        void onLoadMore();
-    }
-
-    public void setLoadMoreListener(OnLoadMoreListener onLoadMoreListener) {
-        this.loadMoreListener = onLoadMoreListener;
-    }
-
     static class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
         private ImageView imageView;
         private ProgressBar progressBar;
         private Post post;
-
-        private static class InsertTagsTypeTask extends AsyncTask<Object, Void, View> {
-            private Post p;
-            @Override
-            protected View doInBackground(Object... params) {
-                View view = (View)params[0];
-                p = (Post)params[1];
-                GelbooruApi.getInstance().insertTagsType(p);
-                return view;
-            }
-
-            @Override
-            protected void onPostExecute(View v) {
-                final Intent intent;
-
-                if (FileUtils.getInstance().isAnimated(p)) {
-                    intent = new Intent(v.getContext(), VideoActivity.class);
-                } else {
-                    intent = new Intent(v.getContext(), ImageActivity.class);
-                }
-                intent.putExtra("post", p);
-                v.getContext().startActivity(intent);
-            }
-        };
 
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
@@ -116,7 +83,33 @@ public class PostAdapter extends RecyclerView.Adapter<PostAdapter.ViewHolder> {
 
         @Override
         public void onClick(final View v) {
-            new InsertTagsTypeTask().execute(v, post);
+            showPost(v.getContext());
+        }
+
+        private void showPost(final Context ctx) {
+            final Executor executor = Executors.newSingleThreadExecutor();
+            final Handler handler = new Handler(Looper.getMainLooper());
+
+            executor.execute(new Runnable() {
+                @Override
+                public void run() {
+                    GelbooruApi.getInstance().insertTagsType(post);
+
+                    handler.post(new Runnable() {
+                        @Override
+                        public void run() {
+                            Intent intent;
+
+                            if (FileUtils.getInstance().isAnimated(post))
+                                intent = new Intent(ctx, VideoActivity.class);
+                            else
+                                intent = new Intent(ctx, ImageActivity.class);
+                            intent.putExtra("post", post);
+                            ctx.startActivity(intent);
+                        }
+                    });
+                }
+            });
         }
     }
 }
