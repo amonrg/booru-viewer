@@ -2,6 +2,8 @@ package com.orin.booruviewer.api;
 
 import com.orin.booruviewer.entity.Tag;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 import java.util.HashMap;
 import java.util.Set;
 
@@ -88,11 +90,21 @@ public class GelUrl {
         if (id != null)
             sb.append("&id=").append(id);
 
-        if (name != null)
-            sb.append("&name=").append(name);
+        if (name != null) {
+            try {
+                sb.append("&name=").append(URLEncoder.encode(name, "UTF-8"));
+            } catch (UnsupportedEncodingException e) {
+                e.printStackTrace();
+            }
+        }
 
-        if (names != null)
-            sb.append("&names=").append(names);
+        if (names != null) {
+            try {
+                sb.append("&names=").append(URLEncoder.encode(names, "UTF-8"));
+            } catch (UnsupportedEncodingException e) {
+                e.printStackTrace();
+            }
+        }
 
         if (json != null)
             sb.append("&json=").append(json);
