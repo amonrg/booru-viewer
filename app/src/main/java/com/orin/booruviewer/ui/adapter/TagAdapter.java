@@ -3,6 +3,7 @@ package com.orin.booruviewer.ui.adapter;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Paint;
+import android.text.Html;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -84,7 +85,7 @@ public class TagAdapter extends RecyclerView.Adapter<TagAdapter.ViewHolder> {
         final Tag[] tagsArray = tags.toArray(new Tag[tags.size()]);
         final Tag tag = tagsArray[position];
 
-        holder.textView.setText(tag.getName().toUpperCase());
+        holder.textView.setText(Html.fromHtml(tag.getName().toUpperCase()).toString());
         holder.cardView.setCardBackgroundColor(tag.getColor());
 
         if (tag.getName().charAt(0) == '-') {
@@ -113,7 +114,8 @@ public class TagAdapter extends RecyclerView.Adapter<TagAdapter.ViewHolder> {
                     FileUtils.getInstance().saveTags(tags);
                     ctx.startActivity(i);
 
-                    if (ctx.getClass().getName().equals("ImageActivity"))
+                    // getSimpleName() gets the class name without its package name
+                    if (ctx.getClass().getSimpleName().equals("ImageActivity"))
                         ((ImageActivity)ctx).finish();
                     else
                         ((VideoActivity)ctx).finish();
