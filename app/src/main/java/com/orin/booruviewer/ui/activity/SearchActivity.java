@@ -7,6 +7,8 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.Menu;
@@ -18,18 +20,15 @@ import android.widget.Button;
 import android.widget.Toast;
 
 import com.orin.booruviewer.R;
-import com.orin.booruviewer.api.ApiCallback;
 import com.orin.booruviewer.api.GelbooruApi;
 import com.orin.booruviewer.entity.Tag;
 import com.orin.booruviewer.ui.adapter.TagAdapter;
 import com.orin.booruviewer.util.FileUtils;
 
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-
 import java.util.LinkedHashSet;
 import java.util.Set;
+import java.util.concurrent.Executor;
+import java.util.concurrent.Executors;
 
 public class SearchActivity extends AppCompatActivity {
     private Set<Tag> tags;
@@ -85,27 +84,23 @@ public class SearchActivity extends AppCompatActivity {
             }
 
             @Override
-            public void onTextChanged(CharSequence s, int start, int before, int count) {
-                GelbooruApi.getInstance().fetchAutocompleteSuggestions(s.toString(), new ApiCallback() {
-                    @Override
-                    public void onSuccess(Object response) {
-                        int length = ((JSONArray) response).length();
-                        for (int i = 0; i < length; i++) {
-                            try {
-                                JSONObject jsonObject = ((JSONArray) response).getJSONObject(i);
-                                autotagAdapter.clear();
-                                autotag[i] = jsonObject.getString("value");
-                            } catch (JSONException e) {
-                                e.printStackTrace();
-                            }
-                        }
-                        autotagAdapter.addAll(autotag);
-                        autotagAdapter.getFilter().filter(txtTag.getText(), null);
-                    }
+            public void onTextChanged(final CharSequence s, int start, int before, int count) {
+                final Executor executor = Executors.newSingleThreadExecutor();
+                final Handler handler = new Handler(Looper.getMainLooper());
 
+                executor.execute(new Runnable() {
                     @Override
-                    public void onError(String errorMsg) {
-                        System.out.println(errorMsg);
+                    public void run() {
+                        final String[] autotag2 = GelbooruApi.getInstance().fetchAutocompleteSuggestions(s.toString());
+
+                        handler.post(new Runnable() {
+                            @Override
+                            public void run() {
+                                autotagAdapter.clear();
+                                autotagAdapter.addAll(autotag2);
+                                autotagAdapter.getFilter().filter(txtTag.getText(), null);
+                            }
+                        });
                     }
                 });
             }
@@ -117,31 +112,23 @@ public class SearchActivity extends AppCompatActivity {
         });
     }
 
-    private void addTag(String name) {
+    private void addTag(final String name) {
         final Tag tag = new Tag(name);
+        final Executor executor = Executors.newSingleThreadExecutor();
+        final Handler handler = new Handler(Looper.getMainLooper());
 
-        GelbooruApi.getInstance().fetchTagType(name, new ApiCallback() {
+        executor.execute(new Runnable() {
             @Override
-            public void onSuccess(Object response) {
-                try {
-                    JSONObject objectResponse = (JSONObject) response;
-                    if (objectResponse.getJSONObject("@attributes").getInt("count") > 0) {
-                        JSONArray jsonArray = objectResponse.getJSONArray("tag");
-                        tag.setType(jsonArray.getJSONObject(0).getString("type"));
-                    } else {
-                        tag.setType(Tag.Type.INVALID.toString());
+            public void run() {
+                tag.setType(GelbooruApi.getInstance().fetchTagType(name));
+                tags.add(tag);
+
+                handler.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        tagAdapter.notifyDataSetChanged();
                     }
-
-                    tags.add(tag);
-                    tagAdapter.notifyDataSetChanged();
-                } catch (JSONException | ClassCastException e) {
-                    e.printStackTrace();
-                }
-            }
-
-            @Override
-            public void onError(String errorMsg) {
-                System.out.println(errorMsg);
+                });
             }
         });
     }
