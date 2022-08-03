@@ -77,8 +77,13 @@ public class GelUrl {
         if (tags != null) {
             sb.append("&tags=");
 
-            for (Tag tag : tags)
-                sb.append(tag.getName()).append("+");
+            for (Tag tag : tags) {
+                try {
+                    sb.append(URLEncoder.encode(tag.getName(), "UTF-8")).append("+");
+                } catch (UnsupportedEncodingException e) {
+                    e.printStackTrace();
+                }
+            }
         }
 
         if (pid != null)
